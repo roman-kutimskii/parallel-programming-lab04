@@ -1,0 +1,12 @@
+build/
+cmake-build-*/
+out/
+.vs/
+.idea/
+.vscode/
+*.exe
+*.obj
+*.o
+sales/
+*.lock
+.DS_Store
