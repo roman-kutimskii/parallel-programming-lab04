@@ -1,11 +1,12 @@
 #include "journal.h"
 
 #include <algorithm>
-#include <cstdio>
+#include <charconv>
 #include <filesystem>
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 namespace fs = std::filesystem;
 
@@ -63,9 +64,17 @@ std::map<int, std::vector<Ticket>> ReadAllJournals()
 
     for (const auto& entry : fs::directory_iterator(SalesDir))
     {
-        int officeId = 0;
+        // Имя файла: office-K.txt
         const std::string name = entry.path().filename().string();
-        if (std::sscanf(name.c_str(), "office-%d.txt", &officeId) != 1)
+        const std::string_view prefix = "office-";
+        const std::string_view suffix = ".txt";
+        if (!name.starts_with(prefix) || !name.ends_with(suffix))
+            continue;
+        int officeId = 0;
+        const char* first = name.data() + prefix.size();
+        const char* last = name.data() + name.size() - suffix.size();
+        const auto [end, ec] = std::from_chars(first, last, officeId);
+        if (ec != std::errc{} || end != last)
             continue;
 
         std::vector<Ticket>& tickets = result[officeId];
